@@ -35,6 +35,8 @@ namespace Fraud {
     // why
     volatile bool toggle_mod = true;
     void Adrenaline_Explosion(int vehicle, int esp, int player) {
+        if (!vehicle || !esp || !player)
+            return;
         float* vehicle_vel_mag_squared = (float*)(esp + 0x10);
         vector3* human_velocity = (vector3*)(esp + 0x2C);
         if (*vehicle_vel_mag_squared > Adrenaline_Speed_Explode) {
@@ -60,9 +62,9 @@ namespace Fraud {
     }
     void __declspec(naked) fraud_adrenaline_on_vehicle_hit_MidHook() {
         static int Continue = 0x006524FF;
-        static int vehicle;
-        static int esp_pointer;
-        static int player;
+         int vehicle;
+         int esp_pointer;
+         int player;
         __asm {
             mov vehicle, edi
             mov esp_pointer, esp
