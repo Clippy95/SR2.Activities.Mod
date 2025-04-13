@@ -1,6 +1,7 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include "BlingMenu_public.h"
+#include "GameConfig.h"
 struct vector3 {
     float x;
     float y;
@@ -90,14 +91,18 @@ DWORD WINAPI LateBM(LPVOID lpParameter)
 {
     // Funny Tervel hooking Sleep, BlingMenu settings get added after 2450ms so 1500 is good enough.
     SleepEx(1500, 0);
-    BlingMenuAddBool("Activities Mod", "Toggle Fraud modifications", (bool*)&Fraud::toggle_mod, nullptr);
+    BlingMenuAddBool("Activities Mod", "toggle_Fraud_modifications", (bool*)&Fraud::toggle_mod, nullptr);
     BlingMenuAddFloat("Activities Mod", "Internal Adrenaline Speed Explode", (float*)&Fraud::Adrenaline_Speed_Explode, nullptr, 0.5f, 0.1f, 40.f);
     BlingMenuAddBool("Activities Mod", "human_velocity_multiplier_on_explode", (bool*)&Fraud::human_velocity_multiplier_on_explode, nullptr);
     return 0;
 }
 
 void init() {
+    GameConfig::Initialize();
     Memory::VP::InjectHook(0x006524F5, &Fraud::fraud_adrenaline_on_vehicle_hit_MidHook, Memory::VP::HookType::Jump);
+    Fraud::toggle_mod = GameConfig::GetValue("Settings", "toggle_Fraud_modifications", 1);
+    if(GameConfig::GetValue("Settings", "Play_as_player_in_zombie_uprising", 1))
+        Memory::VP::InjectHook(0x005B9AC3, 0x005B9BD3, Memory::VP::HookType::Jump);
     if (BlingMenuLoad()) {
         CreateThread(0, 0, LateBM, 0, 0, 0);
     }
